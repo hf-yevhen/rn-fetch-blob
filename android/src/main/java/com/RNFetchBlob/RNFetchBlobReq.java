@@ -600,7 +600,11 @@ public class RNFetchBlobReq extends BroadcastReceiver implements Runnable {
                     if (responseBody != null) {
                         String responseBodyString = null;
                         try {
-                            responseBodyString = responseBody.string();
+                            try {
+                                responseBodyString = responseBody.string();
+                            } catch(IllegalStateException exception) {
+                                exception.printStackTrace();
+                            }
                         } catch(IOException exception) {
                             exception.printStackTrace();
                         }
@@ -727,8 +731,12 @@ public class RNFetchBlobReq extends BroadcastReceiver implements Runnable {
     }
 
     private void emitStateEvent(WritableMap args) {
-        RNFetchBlob.RCTContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                .emit(RNFetchBlobConst.EVENT_HTTP_STATE, args);
+        try {
+            RNFetchBlob.RCTContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                    .emit(RNFetchBlobConst.EVENT_HTTP_STATE, args);
+        } catch (Exception e) {
+            FLog.e("RNFetchBlobReq", "Error emitting state event", e);
+        }
     }
 
     @Override
